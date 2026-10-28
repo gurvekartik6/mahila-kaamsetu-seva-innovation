@@ -1,0 +1,31 @@
+{
+  "name": "mahila-kaamsetu",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k \"npm:dev:server\" \"npm:dev:web\"",
+    "dev:web": "vite --host 0.0.0.0",
+    "dev:server": "node --env-file=.env --watch server/index.js",
+    "build": "vite build",
+    "start": "node --env-file=.env server/index.js",
+    "vercel-build": "vite build",
+    "admin:create": "node --env-file=.env scripts/create-admin.js",
+    "ai:dev": "cd ai-service && uvicorn main:app --reload --port 8000",
+    "test:source": "node --test test/source-regression.test.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "pg": "^8.16.3",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.2",
+    "concurrently": "^9.2.1",
+    "vite": "^7.1.7"
+  },
+  "engines": {
+    "node": "24.x"
+  }
+}

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+.vercel/
+.DS_Store
+
+# AI service secrets
+ai-service/.env
+ai-service/.venv/
+__pycache__/
+*.py[cod]

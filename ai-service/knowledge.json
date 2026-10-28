@@ -1,0 +1,66 @@
+[
+  {
+    "topic": "General safety",
+    "keywords": [
+      "otp",
+      "password",
+      "aadhaar",
+      "आधार",
+      "ओटीपी",
+      "पासवर्ड",
+      "bank",
+      "बँक"
+    ],
+    "answer_mr": "तुमचा OTP, पासवर्ड, पूर्ण आधार क्रमांक किंवा बँक तपशील कोणाशीही शेअर करू नका. अधिकृत कार्यालय किंवा अधिकृत वेबसाइटवरूनच माहिती तपासा.",
+    "answer_hi": "अपना OTP, पासवर्ड, पूरा आधार नंबर या बैंक विवरण किसी के साथ साझा न करें। जानकारी केवल आधिकारिक कार्यालय या वेबसाइट से जाँचें।",
+    "answer_en": "Never share your OTP, password, full Aadhaar number, or bank details. Verify information only through an official office or website."
+  },
+  {
+    "topic": "Employment and training",
+    "keywords": [
+      "काम",
+      "नोकरी",
+      "प्रशिक्षण",
+      "शिवणकाम",
+      "job",
+      "work",
+      "training",
+      "employment",
+      "रोजगार"
+    ],
+    "answer_mr": "काम किंवा प्रशिक्षणासाठी संधी निवडताना संस्था, पात्रता, ठिकाण, तारीख आणि संपर्क अधिकृत स्रोतावरून तपासा. नोंदणीपूर्वी पैसे मागितल्यास सावध राहा. सध्या थेट पडताळलेल्या स्थानिक संधींची यादी जोडलेली नाही.",
+    "answer_hi": "काम या प्रशिक्षण के अवसर के लिए संस्था, पात्रता, स्थान, तारीख और संपर्क आधिकारिक स्रोत से जाँचें। पंजीकरण से पहले पैसे माँगे जाएँ तो सावधान रहें। अभी सत्यापित स्थानीय अवसरों की सूची जुड़ी नहीं है।",
+    "answer_en": "For jobs or training, verify the organisation, eligibility, location, dates, and contact details through official sources. Be cautious if asked to pay a registration fee. A live verified local-opportunity feed is not connected yet."
+  },
+  {
+    "topic": "Government schemes",
+    "keywords": [
+      "योजना",
+      "शासकीय",
+      "सरकारी",
+      "scheme",
+      "government benefit",
+      "अनुदान",
+      "लाभ"
+    ],
+    "answer_mr": "योजनेची पात्रता, आवश्यक कागदपत्रे आणि अर्जाची अंतिम तारीख अधिकृत सरकारी संकेतस्थळ किंवा संबंधित कार्यालयातून तपासा. या सहाय्यकाने सध्या कोणतीही पात्रता किंवा लाभ अधिकृतरीत्या प्रमाणित केलेला नाही.",
+    "answer_hi": "योजना की पात्रता, आवश्यक दस्तावेज और अंतिम तारीख आधिकारिक सरकारी वेबसाइट या संबंधित कार्यालय से जाँचें। यह सहायक अभी किसी पात्रता या लाभ की आधिकारिक पुष्टि नहीं करता।",
+    "answer_en": "Check eligibility, required documents, and deadlines on the official government website or with the relevant office. This assistant does not officially certify eligibility or benefits."
+  },
+  {
+    "topic": "Emergency",
+    "keywords": [
+      "emergency",
+      "धोका",
+      "तातडी",
+      "हिंसा",
+      "danger",
+      "unsafe",
+      "आपत्कालीन",
+      "संकट"
+    ],
+    "answer_mr": "तुम्ही तातडीच्या धोक्यात असाल तर या चॅटवर अवलंबून राहू नका. सुरक्षित ठिकाणी जा आणि स्थानिक आपत्कालीन सेवा किंवा विश्वासू व्यक्तीशी त्वरित संपर्क साधा.",
+    "answer_hi": "यदि आप तत्काल खतरे में हैं, तो इस चैट पर निर्भर न रहें। सुरक्षित स्थान पर जाएँ और स्थानीय आपातकालीन सेवा या भरोसेमंद व्यक्ति से तुरंत संपर्क करें।",
+    "answer_en": "If you are in immediate danger, do not rely on this chat. Move to a safer place and contact local emergency services or a trusted person immediately."
+  }
+]

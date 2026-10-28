@@ -1,0 +1,1 @@
+export default function FeatureCard({ icon, title, text, action, onClick }) { return <article className="feature panel"><span className="feature-icon">{icon}</span><h3>{title}</h3><p>{text}</p><button className="text-button" onClick={onClick}>{action}</button></article>; }
