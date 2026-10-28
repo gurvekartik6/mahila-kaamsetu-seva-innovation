@@ -1,8 +1,7 @@
+import React from 'react'
+import FormField from './FormField.jsx'
 
-import React from 'react';
-import FormField from './FormField.jsx';
-
-export default function ModalHost({
+export default function ModalHost ({
   modal,
   setModal,
   t,
@@ -13,165 +12,174 @@ export default function ModalHost({
   authBusy,
   handleAuthSubmit
 }) {
-  if (!modal) return null;
-
-  const selectedRole = authForm.role || 'member';
+  if (!modal) return null
+  const isAuth = modal.kind === 'auth'
+  const isRegister = authMode === 'register'
+  const isStaffApplication = isRegister && authForm.role === 'staff'
+  const update = (key, value) =>
+    setAuthForm(current => ({ ...current, [key]: value }))
 
   return (
-    <div
-      className="modal-backdrop"
-      onClick={() => setModal(null)}
-    >
+    <div className='modal-backdrop' onClick={() => setModal(null)}>
       <section
-        className="modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="auth-modal-title"
-        onClick={(event) => event.stopPropagation()}
+        className='modal'
+        role='dialog'
+        aria-modal='true'
+        aria-labelledby='modal-title'
+        onClick={event => event.stopPropagation()}
       >
-        <h2 id="auth-modal-title">{modal.title}</h2>
+        <h2 id='modal-title'>{modal.title}</h2>
         <p>{modal.body}</p>
-
-        {modal.kind === 'auth' ? (
-          <form className="auth-form" onSubmit={handleAuthSubmit}>
-            {authMode === 'register' && (
-              <FormField label={t.fullName}>
+        {isAuth ? (
+          <form className='auth-form' onSubmit={handleAuthSubmit}>
+            {isRegister && (
+              <>
+                <FormField label='Create account as'>
+                  <select
+                    value={authForm.role || 'member'}
+                    onChange={event => update('role', event.target.value)}
+                  >
+                    <option value='member'>Rural woman / Member</option>
+                    <option value='staff'>Apply as staff</option>
+                  </select>
+                </FormField>
+                {isStaffApplication && (
+                  <div className='privacy-card staff-approval-note'>
+                    <strong>Administrator approval required</strong>
+                    <p>
+                      Your application will be reviewed. You cannot sign in as
+                      staff until an administrator approves it.
+                    </p>
+                  </div>
+                )}
+                <FormField label={t.fullName || 'Full name'}>
+                  <input
+                    autoComplete='name'
+                    value={authForm.fullName}
+                    onChange={event => update('fullName', event.target.value)}
+                    required
+                    minLength={2}
+                    maxLength={120}
+                  />
+                </FormField>
+                {isStaffApplication && (
+                  <>
+                    <FormField label='Village / area'>
+                      <input
+                        value={authForm.villageOrArea || ''}
+                        onChange={event =>
+                          update('villageOrArea', event.target.value)
+                        }
+                        maxLength={160}
+                        placeholder='Where would you provide support?'
+                      />
+                    </FormField>
+                    <FormField label='Relevant experience'>
+                      <textarea
+                        value={authForm.experience || ''}
+                        onChange={event =>
+                          update('experience', event.target.value)
+                        }
+                        maxLength={1200}
+                        rows={3}
+                        placeholder='Community work, service support, digital help, etc.'
+                      />
+                    </FormField>
+                    <FormField label='Why do you want to join?'>
+                      <textarea
+                        value={authForm.reason || ''}
+                        onChange={event => update('reason', event.target.value)}
+                        maxLength={1200}
+                        rows={3}
+                      />
+                    </FormField>
+                  </>
+                )}
+              </>
+            )}
+            {isRegister && (
+              <FormField label={t.email || 'Email'}>
                 <input
-                  type="text"
-                  autoComplete="name"
-                  value={authForm.fullName}
-                  onChange={(event) =>
-                    setAuthForm({
-                      ...authForm,
-                      fullName: event.target.value
-                    })
-                  }
+                  type='email'
+                  autoComplete='email'
+                  value={authForm.email}
+                  onChange={event => update('email', event.target.value)}
                   required
-                  minLength={2}
-                  maxLength={120}
+                  maxLength={254}
                 />
               </FormField>
             )}
-
-            {authMode === 'login' && (
+            {!isRegister && (
               <>
-                <FormField label={t.accountType || 'Sign in as'}>
+                <FormField label='Sign in as'>
                   <select
-                    id="loginRole"
-                    name="role"
-                    value={selectedRole}
-                    onChange={(event) =>
-                      setAuthForm({
-                        ...authForm,
-                        role: event.target.value
-                      })
-                    }
-                    required
+                    value={authForm.role || 'member'}
+                    onChange={event => update('role', event.target.value)}
                   >
-                    <option value="member">
-                      {t.memberRole || 'Member'}
-                    </option>
-                    <option value="staff">
-                      {t.staffRole || 'Support staff'}
-                    </option>
-                    <option value="admin">
-                      {t.adminRole || 'Administrator'}
-                    </option>
+                    <option value='member'>Rural woman / Member</option>
+                    <option value='staff'>Approved staff</option>
+                    <option value='admin'>Administrator</option>
                   </select>
                 </FormField>
-
-                <p className="auth-role-help">
-                  {selectedRole === 'staff'
-                    ? 'Support staff: you must have an account created or approved by an administrator.'
-                    : selectedRole === 'admin'
-                      ? 'Administrator: use your separately provisioned administrator account.'
-                      : 'Choose the role already assigned to your account. The server verifies your actual role.'}
-                </p>
+                <FormField label={t.email || 'Email'}>
+                  <input
+                    type='email'
+                    autoComplete='email'
+                    value={authForm.email}
+                    onChange={event => update('email', event.target.value)}
+                    required
+                    maxLength={254}
+                  />
+                </FormField>
               </>
             )}
-
-            <FormField label={t.email}>
+            <FormField label={t.password || 'Password'}>
               <input
-                type="email"
-                autoComplete="email"
-                value={authForm.email}
-                onChange={(event) =>
-                  setAuthForm({
-                    ...authForm,
-                    email: event.target.value
-                  })
-                }
-                required
-                maxLength={254}
-              />
-            </FormField>
-
-            <FormField label={t.password}>
-              <input
-                type="password"
-                autoComplete={
-                  authMode === 'register'
-                    ? 'new-password'
-                    : 'current-password'
-                }
+                type='password'
+                autoComplete={isRegister ? 'new-password' : 'current-password'}
                 value={authForm.password}
-                onChange={(event) =>
-                  setAuthForm({
-                    ...authForm,
-                    password: event.target.value
-                  })
-                }
+                onChange={event => update('password', event.target.value)}
                 required
-                minLength={authMode === 'register' ? 10 : 1}
+                minLength={isRegister ? 10 : 1}
                 maxLength={200}
               />
             </FormField>
-
-            {authMode === 'register' && (
+            {isRegister && (
               <small>
-                {t.passwordHelp} Staff and administrator accounts cannot
-                be self-registered. Contact an administrator for approved
-                staff or administrator access.
+                {isStaffApplication
+                  ? 'Your password is stored securely and the account is created only after approval.'
+                  : t.passwordHelp ||
+                    'Use at least 10 characters and include a number.'}
               </small>
             )}
-
-            <button
-              className="btn primary full"
-              type="submit"
-              disabled={authBusy}
-            >
+            <button className='btn primary full' disabled={authBusy}>
               {authBusy
-                ? t.loading
-                : authMode === 'register'
-                  ? t.createAccount
-                  : t.signIn}
+                ? t.loading || 'Please wait…'
+                : isRegister
+                ? isStaffApplication
+                  ? 'Submit staff application'
+                  : t.createAccount || 'Create account'
+                : t.signIn || 'Sign in'}
             </button>
-
             <button
-              type="button"
-              className="text-button"
-              onClick={() =>
-                setAuthMode(
-                  authMode === 'register' ? 'login' : 'register'
-                )
-              }
-              disabled={authBusy}
+              type='button'
+              className='text-button'
+              onClick={() => {
+                setAuthMode(isRegister ? 'login' : 'register')
+                setAuthForm(current => ({ ...current, role: 'member' }))
+              }}
             >
-              {authMode === 'register'
-                ? t.haveAccount
-                : t.needAccount}
+              {isRegister
+                ? t.haveAccount || 'Already have an account? Sign in'
+                : t.needAccount || 'Create an account'}
             </button>
           </form>
         ) : (
-          <button
-            className="btn primary"
-            type="button"
-            onClick={() => setModal(null)}
-          >
-            {t.understood}
+          <button className='btn primary' onClick={() => setModal(null)}>
+            {t.understood || 'Understood'}
           </button>
         )}
       </section>
     </div>
-  );
+  )
 }

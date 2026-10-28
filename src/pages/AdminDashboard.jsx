@@ -1,20 +1,17 @@
-import React, { useState } from 'react';
-import PageHeading from '../components/PageHeading.jsx';
-import Stat from '../components/Stat.jsx';
-import FormField from '../components/FormField.jsx';
+import React, { useState } from "react";
+import PageHeading from "../components/PageHeading.jsx";
+import Stat from "../components/Stat.jsx";
+import FormField from "../components/FormField.jsx";
 
 function MessageStatus({ status }) {
   const label =
-    status === 'open'
-      ? 'Awaiting admin response'
-      : status === 'answered'
-        ? 'Answered'
-        : 'Closed';
-
+    status === "open"
+      ? "Awaiting admin response"
+      : status === "answered"
+        ? "Answered"
+        : "Closed";
   return (
-    <span className={`status ${status !== 'open' ? 'done' : ''}`}>
-      {label}
-    </span>
+    <span className={`status ${status !== "open" ? "done" : ""}`}>{label}</span>
   );
 }
 
@@ -33,18 +30,15 @@ export default function AdminDashboard(props) {
     setAdminUsers,
     adminLogs,
     notify,
+    staffApplications = [],
+    reviewStaffApplication,
     staffMessages = [],
     adminMessages = [],
     sendStaffMessage,
-    replyStaffMessage
+    replyStaffMessage,
   } = props;
-
   const [replyDrafts, setReplyDrafts] = useState({});
-  const workspaceTitle =
-    user.role === 'admin'
-      ? 'Administrator dashboard'
-      : 'Support staff workspace';
-
+  const workspaceTitle = "Administrator dashboard";
   return (
     <>
       <PageHeading
@@ -56,202 +50,68 @@ export default function AdminDashboard(props) {
           {t.refresh}
         </button>
       </PageHeading>
-
       <div className="stats">
-        <Stat
-          icon="👥"
-          value={adminSummary?.users ?? '—'}
-          label={t.users}
-        />
+        <Stat icon="👥" value={adminSummary?.users ?? "—"} label={t.users} />
         <Stat
           icon="📌"
-          value={adminSummary?.requests ?? '—'}
+          value={adminSummary?.requests ?? "—"}
           label={t.trackTitle}
         />
         <Stat
           icon="⏳"
-          value={adminSummary?.openRequests ?? '—'}
+          value={adminSummary?.openRequests ?? "—"}
           label={t.openRequests}
         />
         <Stat
           icon="🌱"
-          value={adminSummary?.opportunities ?? '—'}
+          value={adminSummary?.opportunities ?? "—"}
           label={t.navWork}
         />
       </div>
 
-      {user.role === 'staff' && (
-        <>
-          <section className="panel admin-panel staff-contact-panel">
-            <h2>Contact administrator</h2>
-            <p className="muted">
-              Send an internal message about account access, a difficult
-              request, an opportunity, or an operational issue. Your message
-              is saved for the administrator to review.
-            </p>
-
-            <form
-              className="staff-message-form"
-              onSubmit={(event) => {
-                const form = event.currentTarget;
-                const data = new FormData(form);
-
-                sendStaffMessage(event, {
-                  subject: String(data.get('subject') || ''),
-                  message: String(data.get('message') || '')
-                });
-              }}
-            >
-              <FormField label="Subject">
-                <input
-                  name="subject"
-                  required
-                  minLength={3}
-                  maxLength={160}
-                  placeholder="What do you need help with?"
-                />
-              </FormField>
-
-              <FormField label="Message">
-                <textarea
-                  name="message"
-                  required
-                  minLength={3}
-                  maxLength={3000}
-                  rows={4}
-                  placeholder="Describe the issue and any relevant request ID."
-                />
-              </FormField>
-
-              <button className="btn primary" type="submit">
-                Send to administrator
-              </button>
-            </form>
-          </section>
-
-          <section className="panel admin-panel">
-            <div className="admin-section-heading">
-              <h2>My messages to administrator</h2>
-              <button
-                className="btn outline small"
-                onClick={loadAdmin}
-              >
-                Refresh messages
-              </button>
-            </div>
-
-            {staffMessages.length ? (
-              staffMessages.map((message) => (
-                <article
-                  className="staff-message-card"
-                  key={message.id}
-                >
-                  <div className="staff-message-card-heading">
-                    <strong>{message.subject}</strong>
-                    <MessageStatus status={message.status} />
-                  </div>
-
-                  <p>{message.message}</p>
-
-                  <small>
-                    Sent{' '}
-                    {message.createdAt
-                      ? new Date(message.createdAt).toLocaleString()
-                      : ''}
-                  </small>
-
-                  {message.adminReply ? (
-                    <div className="admin-reply">
-                      <strong>Administrator response</strong>
-                      <p>{message.adminReply}</p>
-                      <small>
-                        {message.respondedAt
-                          ? new Date(
-                              message.respondedAt
-                            ).toLocaleString()
-                          : ''}
-                      </small>
-                    </div>
-                  ) : (
-                    <p className="muted staff-awaiting">
-                      Waiting for an administrator to respond.
-                    </p>
-                  )}
-                </article>
-              ))
-            ) : (
-              <p className="muted">
-                You have not contacted the administrator yet. Use the form
-                above to send a message.
-              </p>
-            )}
-          </section>
-        </>
-      )}
-
-      {user.role === 'admin' && (
+      {user.role === "admin" && (
         <section className="panel admin-panel">
           <div className="admin-section-heading">
             <div>
               <h2>Staff messages &amp; escalation inbox</h2>
               <p className="muted">
-                Review staff questions and send a response. Staff can see
-                your reply in their workspace.
+                Review staff questions and send a response. Staff can see your
+                reply in their workspace.
               </p>
             </div>
-
-            <button
-              className="btn outline small"
-              onClick={loadAdmin}
-            >
+            <button className="btn outline small" onClick={loadAdmin}>
               Refresh inbox
             </button>
           </div>
-
           {adminMessages.length ? (
             adminMessages.map((message) => (
-              <article
-                className="staff-message-card"
-                key={message.id}
-              >
+              <article className="staff-message-card" key={message.id}>
                 <div className="staff-message-card-heading">
                   <strong>{message.subject}</strong>
                   <MessageStatus status={message.status} />
                 </div>
-
                 <p className="staff-message-meta">
-                  From {message.staffName || 'Staff'} ·{' '}
-                  {message.staffEmail} ·{' '}
+                  From {message.staffName || "Staff"} · {message.staffEmail} ·{" "}
                   {message.createdAt
                     ? new Date(message.createdAt).toLocaleString()
-                    : ''}
+                    : ""}
                 </p>
-
                 <p>{message.message}</p>
-
                 {message.adminReply && (
                   <div className="admin-reply">
                     <strong>Previous response</strong>
                     <p>{message.adminReply}</p>
                   </div>
                 )}
-
                 <form
                   className="staff-reply-form"
                   onSubmit={(event) => {
                     event.preventDefault();
-
                     const value = String(
-                      new FormData(event.currentTarget).get('reply') || ''
+                      new FormData(event.currentTarget).get("reply") || "",
                     ).trim();
-
                     if (!value) return;
-
-                    replyStaffMessage(
-                      message.id,
-                      value,
-                      'answered'
-                    );
+                    replyStaffMessage(message.id, value, "answered");
                   }}
                 >
                   <label>
@@ -268,19 +128,17 @@ export default function AdminDashboard(props) {
                       onChange={(event) =>
                         setReplyDrafts((old) => ({
                           ...old,
-                          [message.id]: event.target.value
+                          [message.id]: event.target.value,
                         }))
                       }
                       placeholder="Write a clear response or next steps."
                     />
                   </label>
-
                   <div className="staff-reply-actions">
                     <button className="btn primary" type="submit">
                       Save and send response
                     </button>
-
-                    {message.status !== 'closed' && (
+                    {message.status !== "closed" && (
                       <button
                         className="btn outline"
                         type="button"
@@ -288,21 +146,15 @@ export default function AdminDashboard(props) {
                           const reply = (
                             replyDrafts[message.id] ??
                             message.adminReply ??
-                            ''
+                            ""
                           ).trim();
-
                           if (!reply) {
                             notify(
-                              'Write a reply before closing this message.'
+                              "Write a reply before closing this message.",
                             );
                             return;
                           }
-
-                          replyStaffMessage(
-                            message.id,
-                            reply,
-                            'closed'
-                          );
+                          replyStaffMessage(message.id, reply, "closed");
                         }}
                       >
                         Reply and close
@@ -314,16 +166,93 @@ export default function AdminDashboard(props) {
             ))
           ) : (
             <p className="muted">
-              No staff messages yet. Messages sent from a staff workspace
-              will appear here.
+              No staff messages yet. Messages sent from a staff workspace will
+              appear here.
             </p>
           )}
         </section>
       )}
 
+      <section className="panel admin-panel staff-approval-panel">
+        <div className="admin-section-heading">
+          <div>
+            <h2>Staff applications</h2>
+            <p className="muted">
+              Review applicants before creating a staff login. Approval is
+              required before staff can sign in.
+            </p>
+          </div>
+          <button className="btn outline small" onClick={loadAdmin}>
+            Refresh applications
+          </button>
+        </div>
+        {staffApplications.length ? (
+          staffApplications.map((application) => (
+            <article className="staff-application-card" key={application.id}>
+              <div className="staff-case-heading">
+                <div>
+                  <strong>{application.fullName}</strong>
+                  <p>
+                    {application.email} ·{" "}
+                    {application.villageOrArea || "Area not provided"}
+                  </p>
+                </div>
+                <span
+                  className={`status ${application.status === "approved" ? "done" : ""}`}
+                >
+                  {application.status}
+                </span>
+              </div>
+              {application.experience && (
+                <p>
+                  <strong>Experience:</strong> {application.experience}
+                </p>
+              )}
+              {application.reason && (
+                <p>
+                  <strong>Reason for applying:</strong> {application.reason}
+                </p>
+              )}
+              <small className="muted">
+                Applied{" "}
+                {application.createdAt
+                  ? new Date(application.createdAt).toLocaleString()
+                  : ""}
+              </small>
+              {application.status === "pending" && (
+                <div className="staff-reply-actions">
+                  <button
+                    className="btn primary"
+                    onClick={() =>
+                      reviewStaffApplication(application.id, "approve")
+                    }
+                  >
+                    Approve application
+                  </button>
+                  <button
+                    className="btn outline"
+                    onClick={() =>
+                      reviewStaffApplication(application.id, "reject")
+                    }
+                  >
+                    Reject application
+                  </button>
+                </div>
+              )}
+              {application.reviewNote && (
+                <p className="muted">Review note: {application.reviewNote}</p>
+              )}
+            </article>
+          ))
+        ) : (
+          <p className="muted">
+            No staff applications have been submitted yet.
+          </p>
+        )}
+      </section>
+
       <section className="panel admin-panel">
         <h2>{t.requestQueue}</h2>
-
         {requests.length ? (
           requests.map((r) => (
             <div className="request-row" key={r.id}>
@@ -333,27 +262,60 @@ export default function AdminDashboard(props) {
                 </strong>
                 <p>{r.description}</p>
                 <small>
-                  {r.village} ·{' '}
-                  {r.createdAt
-                    ? new Date(r.createdAt).toLocaleString()
-                    : ''}
+                  {r.village} ·{" "}
+                  {r.createdAt ? new Date(r.createdAt).toLocaleString() : ""}
+                </small>
+                <small className="muted">
+                  Assigned to: {r.assignedStaffName || "Nobody yet"}
                 </small>
               </div>
-
-              <select
-                aria-label={t.status}
-                value={r.status}
-                onChange={(e) =>
-                  updateRequestStatus(r, e.target.value)
-                }
-              >
-                <option value="created">{t.created}</option>
-                <option value="review">{t.inReview}</option>
-                <option value="in_progress">{t.inProgress}</option>
-                <option value="waiting_user">{t.waitingUser}</option>
-                <option value="completed">{t.completed}</option>
-                <option value="rejected">{t.rejected}</option>
-              </select>
+              <div className="admin-request-actions">
+                <select
+                  aria-label="Assign staff member"
+                  value={r.assignedStaffId || ""}
+                  onChange={async (e) => {
+                    const staffId = e.target.value
+                      ? Number(e.target.value)
+                      : null;
+                    const response = await fetch(
+                      `/api/admin/requests/${encodeURIComponent(r.id)}/assign`,
+                      {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ staffId }),
+                      },
+                    );
+                    const data = await response.json();
+                    if (!response.ok) {
+                      notify(data.error || t.error);
+                      return;
+                    }
+                    notify("Request assignment updated.");
+                    await loadAdmin();
+                  }}
+                >
+                  <option value="">Unassigned</option>
+                  {adminUsers
+                    .filter((u) => u.role === "staff" && u.active !== false)
+                    .map((staff) => (
+                      <option key={staff.id} value={staff.id}>
+                        {staff.fullName}
+                      </option>
+                    ))}
+                </select>
+                <select
+                  aria-label={t.status}
+                  value={r.status}
+                  onChange={(e) => updateRequestStatus(r, e.target.value)}
+                >
+                  <option value="created">{t.created}</option>
+                  <option value="review">{t.inReview}</option>
+                  <option value="in_progress">{t.inProgress}</option>
+                  <option value="waiting_user">{t.waitingUser}</option>
+                  <option value="completed">{t.completed}</option>
+                  <option value="rejected">{t.rejected}</option>
+                </select>
+              </div>
             </div>
           ))
         ) : (
@@ -363,7 +325,6 @@ export default function AdminDashboard(props) {
 
       <section className="panel admin-panel">
         <h2>{t.addOpportunity}</h2>
-
         <form className="admin-form" onSubmit={createOpportunity}>
           <FormField label={t.opTitle}>
             <input
@@ -374,12 +335,11 @@ export default function AdminDashboard(props) {
               onChange={(e) =>
                 setAdminOpportunity({
                   ...adminOpportunity,
-                  title: e.target.value
+                  title: e.target.value,
                 })
               }
             />
           </FormField>
-
           <FormField label={t.description}>
             <textarea
               required
@@ -389,19 +349,18 @@ export default function AdminDashboard(props) {
               onChange={(e) =>
                 setAdminOpportunity({
                   ...adminOpportunity,
-                  description: e.target.value
+                  description: e.target.value,
                 })
               }
             />
           </FormField>
-
           <FormField label={t.kind}>
             <select
               value={adminOpportunity.kind}
               onChange={(e) =>
                 setAdminOpportunity({
                   ...adminOpportunity,
-                  kind: e.target.value
+                  kind: e.target.value,
                 })
               }
             >
@@ -410,7 +369,6 @@ export default function AdminDashboard(props) {
               <option value="support">{t.support}</option>
             </select>
           </FormField>
-
           <FormField label={t.organisation}>
             <input
               required
@@ -418,48 +376,44 @@ export default function AdminDashboard(props) {
               onChange={(e) =>
                 setAdminOpportunity({
                   ...adminOpportunity,
-                  organisation: e.target.value
+                  organisation: e.target.value,
                 })
               }
             />
           </FormField>
-
           <FormField label={t.location}>
             <input
               value={adminOpportunity.location}
               onChange={(e) =>
                 setAdminOpportunity({
                   ...adminOpportunity,
-                  location: e.target.value
+                  location: e.target.value,
                 })
               }
             />
           </FormField>
-
           <FormField label={t.eligibility}>
             <input
               value={adminOpportunity.eligibility}
               onChange={(e) =>
                 setAdminOpportunity({
                   ...adminOpportunity,
-                  eligibility: e.target.value
+                  eligibility: e.target.value,
                 })
               }
             />
           </FormField>
-
           <FormField label={t.compensation}>
             <input
               value={adminOpportunity.compensation}
               onChange={(e) =>
                 setAdminOpportunity({
                   ...adminOpportunity,
-                  compensation: e.target.value
+                  compensation: e.target.value,
                 })
               }
             />
           </FormField>
-
           <FormField label={t.applicationUrl}>
             <input
               type="url"
@@ -467,25 +421,23 @@ export default function AdminDashboard(props) {
               onChange={(e) =>
                 setAdminOpportunity({
                   ...adminOpportunity,
-                  applicationUrl: e.target.value
+                  applicationUrl: e.target.value,
                 })
               }
             />
           </FormField>
-
           <FormField label={t.contact}>
             <input
               value={adminOpportunity.contact}
               onChange={(e) =>
                 setAdminOpportunity({
                   ...adminOpportunity,
-                  contact: e.target.value
+                  contact: e.target.value,
                 })
               }
             />
           </FormField>
-
-          {user.role === 'admin' && (
+          {user.role === "admin" && (
             <>
               <label className="consent">
                 <input
@@ -494,13 +446,12 @@ export default function AdminDashboard(props) {
                   onChange={(e) =>
                     setAdminOpportunity({
                       ...adminOpportunity,
-                      verified: e.target.checked
+                      verified: e.target.checked,
                     })
                   }
                 />
                 {t.verifyOpportunity}
               </label>
-
               <label className="consent">
                 <input
                   type="checkbox"
@@ -508,7 +459,7 @@ export default function AdminDashboard(props) {
                   onChange={(e) =>
                     setAdminOpportunity({
                       ...adminOpportunity,
-                      published: e.target.checked
+                      published: e.target.checked,
                     })
                   }
                 />
@@ -516,109 +467,87 @@ export default function AdminDashboard(props) {
               </label>
             </>
           )}
-
-          {user.role !== 'admin' && (
+          {user.role !== "admin" && (
             <p className="field">
               <small>
-                New listings remain unpublished until an administrator
-                verifies and publishes them.
+                New listings remain unpublished until an administrator verifies
+                and publishes them.
               </small>
             </p>
           )}
-
           <button className="btn primary" type="submit">
             {t.saveOpportunity}
           </button>
         </form>
       </section>
 
-      {user.role === 'admin' && (
+      {user.role === "admin" && (
         <section className="panel admin-panel">
           <h2>{t.users}</h2>
-
           {adminUsers.map((u) => (
             <div className="request-row" key={u.id}>
               <div className="request-main">
                 <strong>{u.fullName}</strong>
                 <p>
-                  {u.email} · {u.role} ·{' '}
-                  {u.active === false
-                    ? t.accountDisabled
-                    : t.accountActive}
+                  {u.email} · {u.role} ·{" "}
+                  {u.active === false ? t.accountDisabled : t.accountActive}
                 </p>
               </div>
-
               <select
                 value={u.role}
                 aria-label={t.role}
                 onChange={async (e) => {
                   const r = await fetch(`/api/admin/users/${u.id}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ role: e.target.value })
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ role: e.target.value }),
                   });
-
                   const d = await r.json();
-
-                  if (!r.ok) {
-                    notify(d.error || t.error);
-                  } else {
+                  if (!r.ok) notify(d.error || t.error);
+                  else
                     setAdminUsers((old) =>
-                      old.map((x) => (x.id === u.id ? d.user : x))
+                      old.map((x) => (x.id === u.id ? d.user : x)),
                     );
-                  }
                 }}
               >
                 <option value="member">member</option>
-                <option value="staff">staff</option>
+                <option value="staff" disabled>
+                  staff (approval required)
+                </option>
                 <option value="admin">admin</option>
               </select>
-
               <button
                 className="btn outline small"
                 onClick={async () => {
                   const r = await fetch(`/api/admin/users/${u.id}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      active: u.active === false
-                    })
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ active: u.active === false }),
                   });
-
                   const d = await r.json();
-
-                  if (!r.ok) {
-                    notify(d.error || t.error);
-                  } else {
+                  if (!r.ok) notify(d.error || t.error);
+                  else
                     setAdminUsers((old) =>
-                      old.map((x) => (x.id === u.id ? d.user : x))
+                      old.map((x) => (x.id === u.id ? d.user : x)),
                     );
-                  }
                 }}
               >
-                {u.active === false
-                  ? t.enableAccount
-                  : t.disableAccount}
+                {u.active === false ? t.enableAccount : t.disableAccount}
               </button>
             </div>
           ))}
         </section>
       )}
-
       <section className="panel admin-panel">
         <h2>{t.auditLogs}</h2>
-
         {adminLogs.map((log, i) => (
           <div className="audit-row" key={log.id || i}>
             <strong>{log.action}</strong>
             <span>
-              {log.actor || ''} · {log.entityType || ''}{' '}
-              {log.entityId || ''}
+              {log.actor || ""} · {log.entityType || ""} {log.entityId || ""}
             </span>
             <small>
-              {log.createdAt
-                ? new Date(log.createdAt).toLocaleString()
-                : ''}
+              {log.createdAt ? new Date(log.createdAt).toLocaleString() : ""}
             </small>
           </div>
         ))}

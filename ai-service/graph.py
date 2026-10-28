@@ -2,12 +2,15 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 from pathlib import Path
 from typing import TypedDict, Literal
 
 from langgraph.graph import StateGraph, END
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 load_dotenv(Path(__file__).with_name(".env"))
 KNOWLEDGE = json.loads(Path(__file__).with_name("knowledge.json").read_text(encoding="utf-8"))
@@ -22,8 +25,14 @@ class AssistantState(TypedDict, total=False):
     needs_human: bool
     used_llm: bool
 
+def required_message(state: AssistantState) -> str:
+    message = state.get("message")
+    if not message or not message.strip():
+        raise ValueError("Assistant state requires a non-empty message.")
+    return message.strip()
+
 def classify(state: AssistantState) -> dict:
-    msg = state["message"].lower()
+    msg = required_message(state).lower()
     if any(x in msg for x in ["emergency", "danger", "unsafe", "violence", "धोका", "तातडी", "हिंसा", "आपत्कालीन", "संकट"]):
         intent = "emergency"
     elif any(x in msg for x in ["scheme", "सरकारी", "योजना", "शासकीय", "अनुदान", "benefit", "लाभ"]):
@@ -37,7 +46,7 @@ def classify(state: AssistantState) -> dict:
     return {"intent": intent}
 
 def retrieve(state: AssistantState) -> dict:
-    msg = state["message"].lower()
+    msg = required_message(state).lower()
     matches = [item for item in KNOWLEDGE if any(term.lower() in msg for term in item["keywords"])]
     if state.get("intent") == "emergency":
         matches = [item for item in KNOWLEDGE if item["topic"] == "Emergency"]
@@ -51,6 +60,7 @@ def retrieve(state: AssistantState) -> dict:
 def compose(state: AssistantState) -> dict:
     language = state.get("language", "mr")
     context = state.get("context", "")
+    message = required_message(state)
     api_key = os.getenv("GEMINI_API_KEY", "").strip()
     if api_key and context:
         try:
@@ -58,7 +68,7 @@ def compose(state: AssistantState) -> dict:
             from google.genai import types
 
             client = genai.Client(api_key=api_key)
-            model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+            model_name = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
             language_name = {"mr": "Marathi", "hi": "Hindi", "en": "English"}.get(language, "Marathi")
             prompt = (
                 "You are Mahila KaamSetu, a careful rural-women support assistant. "
@@ -67,7 +77,7 @@ def compose(state: AssistantState) -> dict:
                 "Never request OTPs, passwords, full Aadhaar numbers, or bank secrets. "
                 "If the context is insufficient, say so and direct the user to an official source. "
                 "Keep the answer clear, respectful, and easy to understand.\n\n"
-                f"Guidance context:\n{context}\n\nUser question:\n{state['message']}"
+                f"Guidance context:\n{context}\n\nUser question:\n{message}"
             )
             response = client.models.generate_content(
                 model=model_name,
@@ -77,9 +87,12 @@ def compose(state: AssistantState) -> dict:
             answer = (response.text or "").strip()
             if answer:
                 return {"answer": answer[:5000], "used_llm": True}
-        except Exception:
+        except Exception as exc:
             # Do not expose provider errors or secrets; deterministic guidance remains available.
-            pass
+            logger.warning(
+                "Gemini response failed; using deterministic guidance (%s).",
+                type(exc).__name__,
+            )
 
     fallback = {
         "mr": "मला याबद्दल खात्रीशीर माहिती उपलब्ध नाही. कृपया प्रश्न थोडा स्पष्ट करा किंवा संबंधित अधिकृत कार्यालय/संकेतस्थळावरून माहिती तपासा.",
