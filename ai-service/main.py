@@ -9,25 +9,39 @@ from typing import Literal
 
 from graph import answer_question
 
+
+# --------------------------------------------------
+# LOGGING CONFIGURATION
+# --------------------------------------------------
+
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
 logger = logging.getLogger("mahila_kaamsetu.api")
 
+
+# --------------------------------------------------
+# FASTAPI APPLICATION
+# --------------------------------------------------
+
 app = FastAPI(
     title="Mahila KaamSetu AI Service",
     version="1.1.0",
+    description="Multilingual AI assistant for rural women."
 )
 
-# Set FRONTEND_ORIGINS in the backend environment for deployment.
-# Example: https://your-actual-website.vercel.app
+
+# --------------------------------------------------
+# CORS CONFIGURATION
+# --------------------------------------------------
+
 origins = [
     origin.strip().rstrip("/")
     for origin in os.getenv(
         "FRONTEND_ORIGINS",
-        "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000",
+        "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000"
     ).split(",")
     if origin.strip()
 ]
@@ -41,47 +55,128 @@ app.add_middleware(
 )
 
 
+# --------------------------------------------------
+# REQUEST MODEL
+# --------------------------------------------------
+
 class AssistantRequest(BaseModel):
-    message: str = Field(min_length=2, max_length=3000)
+
+    message: str = Field(
+        min_length=2,
+        max_length=3000
+    )
+
     language: Literal["mr", "hi", "en"] = "mr"
 
 
-@app.get("/health")
-def health():
+# --------------------------------------------------
+# ROOT ENDPOINT
+# --------------------------------------------------
+
+@app.get("/")
+def root():
+
     return {
         "ok": True,
-        "service": "mahila-kaamsetu-ai",
-        "graph": "langgraph",
+        "service": "Mahila KaamSetu AI Service",
+        "version": "1.1.0",
+        "status": "running",
+        "endpoints": {
+            "health": "/health",
+            "assistant": "/assistant",
+            "documentation": "/docs",
+            "openapi": "/openapi.json"
+        }
     }
 
 
+# --------------------------------------------------
+# HEALTH CHECK ENDPOINT
+# --------------------------------------------------
+
+@app.get("/health")
+def health():
+
+    return {
+        "ok": True,
+        "service": "mahila-kaamsetu-ai",
+        "graph": "langgraph"
+    }
+
+
+# --------------------------------------------------
+# AI ASSISTANT ENDPOINT
+# --------------------------------------------------
+
 @app.post("/assistant")
 def assistant(payload: AssistantRequest):
+
     message = payload.message.strip()
 
     if len(message) < 2:
         raise HTTPException(
             status_code=422,
-            detail="Please enter a longer message.",
+            detail="Message must contain at least two characters."
         )
 
     try:
-        result = answer_question(message, payload.language)
 
         logger.info(
-            "Assistant completed: language=%s intent=%s "
-            "knowledge_used=%s llm_used=%s",
-            result.get("language"),
+            "Received assistant request: language=%s, message_length=%d",
+            payload.language,
+            len(message)
+        )
+
+        # Process the question using LangGraph
+        result = answer_question(
+            message,
+            payload.language
+        )
+
+        logger.info(
+            "Assistant request completed: intent=%s, knowledgeUsed=%s, llmUsed=%s",
             result.get("intent"),
             result.get("knowledgeUsed"),
-            result.get("llmUsed"),
+            result.get("llmUsed")
         )
 
         return result
 
+    except ValueError as exc:
+
+        logger.warning(
+            "Invalid assistant request: %s",
+            str(exc)
+        )
+
+        raise HTTPException(
+            status_code=422,
+            detail=str(exc)
+        )
+
     except Exception:
-        logger.exception("Assistant workflow failed.")
+
+        logger.exception(
+            "Assistant processing failed."
+        )
+
         raise HTTPException(
             status_code=503,
-            detail="Assistant service temporarily unavailable.",
+            detail="The AI assistant is temporarily unavailable. Please try again later."
         )
+
+
+# --------------------------------------------------
+# APPLICATION STARTUP
+# --------------------------------------------------
+
+@app.on_event("startup")
+async def startup_event():
+
+    logger.info(
+        "Mahila KaamSetu AI Service started successfully."
+    )
+
+    logger.info(
+        "Available API endpoints: /, /health, /assistant, /docs"
+    )
